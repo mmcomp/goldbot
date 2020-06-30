@@ -10,6 +10,16 @@ class ParseMessage {
             this.color = 'blue'
         }
         let rawSplitMessage = rawMessage.split(' ')
+        let remainings = rawMessage.split(':')
+        // console.log('remainingd', remainings)
+        this.remaining = -1
+        if(remainings.length==2){
+            remainings = parseInt(remainings[1].replace(')', '').replace(/ /g, ''), 10)
+            // console.log('remain', remainings)
+            if(!isNaN(remainings)){
+                this.remaining = remainings
+            }
+        }
         if(this.color && rawSplitMessage.length>=4){
             let tmpCount, tmpPrice, tmpName = ''
             for(let i = 1;i < rawSplitMessage.length-1;i++){
@@ -17,6 +27,9 @@ class ParseMessage {
                 tmpPrice = rawSplitMessage[i+1]
                 if(rawSplitMessage[i]=='ف' || rawSplitMessage[i]=='خ'){
                     this.count = parseInt(tmpCount, 10)
+                    if(this.remaining<0){
+                        this.remaining = this.count
+                    }
                     this.price = parseInt(tmpPrice, 10)
                     this.name = tmpName
                     if(rawSplitMessage[i]=='ف'){
@@ -28,7 +41,7 @@ class ParseMessage {
                     tmpName += rawSplitMessage[i-1]
                 }
             }
-            if(this.count && this.price){
+            if(this.count && this.price && this.count>0 && this.remaining>0){
                 this.status = true
                 client.set('user_' + this.type + '_' + this.userId, JSON.stringify(this))
                 client.expire(this.userId,  60)

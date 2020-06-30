@@ -2,13 +2,14 @@ const { Extra } = require('telegraf')
 
 class Logic{
     static async getValue(client, key){
+        // console.log('getting value of ', key)
         return new Promise(function(resolve, reject){
             client.get(key, function(err, value){
                 if(err){
                     console.log('get key error', err)
                     return reject(err)
                 }
-
+                // console.log('value', value)
                 value = JSON.parse(value)
                 return resolve(value)
             })
@@ -53,12 +54,20 @@ class Logic{
             try{
                 var low = await Logic.getValue(client, 'low')
                 var high = await Logic.getValue(client, 'high')
-                if(low.price<high.price){
+                console.log('CHECK')
+                console.log('low', low)
+                console.log('high', high)
+                if(low && high && low.price<high.price){
                     // console.log('action')
                     Logic.replyTo(bot, low.chatId, '1', low.messageId)
                     Logic.replyTo(bot, high.chatId, '1', high.messageId)
+                    console.log('deleting ...', 'user_sale_' + low.userId, 'user_buy_' + high.userId)
+                    client.del('user_sale_' + low.userId)
+                    client.del('user_buy_' + high.userId)
+                    client.del('low')
+                    client.del('high')
                 }
-            }catch(e){}
+            }catch(e){console.log(e)}
         })
     }
 

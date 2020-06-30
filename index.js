@@ -9,11 +9,9 @@ client.on('error', function (error) {
 })
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-// bot.start((ctx) => ctx.reply('Welcome'))
-// bot.help((ctx) => ctx.reply('Send me a sticker'))
-// bot.on('sticker', (ctx) => ctx.reply('👍'))
-// bot.hears('hi', (ctx) => ctx.reply('Hey there'))
-bot.on('message', (ctx , extra) => {
+
+bot.on('message', (ctx) => {
+    // console.log(ctx)
     if(ctx.update.message.text)
     {
         let parseMessage = new ParseMessage(client, ctx.update.message.text, ctx.update.message.from.id, ctx.update.message.message_id, ctx.chat.id)
