@@ -61,9 +61,9 @@ class Logic{
                     // console.log('action')
                     Logic.replyTo(bot, low.chatId, '1', low.messageId)
                     Logic.replyTo(bot, high.chatId, '1', high.messageId)
-                    console.log('deleting ...', 'user_sale_' + low.userId, 'user_buy_' + high.userId)
-                    client.del('user_sale_' + low.userId)
-                    client.del('user_buy_' + high.userId)
+                    console.log('deleting ...', 'user_sale_' + low.name, 'user_buy_' + high.name)
+                    client.del('user_sale_' + low.name)
+                    client.del('user_buy_' + high.name)
                     client.del('low')
                     client.del('high')
                 }

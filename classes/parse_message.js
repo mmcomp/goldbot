@@ -43,8 +43,8 @@ class ParseMessage {
             }
             if(this.count && this.price && this.count>0 && this.remaining>0){
                 this.status = true
-                client.set('user_' + this.type + '_' + this.userId, JSON.stringify(this))
-                client.expire(this.userId,  60)
+                client.set('user_' + this.type + '_' + this.name, JSON.stringify(this))
+                client.expire('user_' + this.type + '_' + this.name,  60)
             }
         }
     }
