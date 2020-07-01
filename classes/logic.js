@@ -78,6 +78,7 @@ class Logic{
                 client.del('user_buy_' + high.name)
                 client.del('low')
                 client.del('high')
+
             }
         }catch(e){console.log(e)}
     }
