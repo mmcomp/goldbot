@@ -10,7 +10,9 @@ class Logic{
                     return reject(err)
                 }
                 // console.log('value', value)
-                value = JSON.parse(value)
+                try{
+                    value = JSON.parse(value)
+                }catch(e){}
                 return resolve(value)
             })
         })
