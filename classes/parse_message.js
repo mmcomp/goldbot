@@ -41,7 +41,27 @@ class ParseMessage {
                     tmpName += rawSplitMessage[i-1]
                 }
             }
-            if(this.count && this.price && this.count>0 && this.remaining>0){
+            if(rawMessage.indexOf('لغو شد') > 0){
+                client.del('user_' + this.type + '_' + this.name)
+                if(this.type=='sale'){
+                    client.get('low', function(err, res){
+                        if(!err){
+                            if(res.name==this.name){
+                                client.del('low')
+                            }
+                        }
+                    })
+                }else{
+                    client.get('high', function(err, res){
+                        if(!err){
+                            if(res.name==this.name){
+                                client.del('high')
+                            }
+                        }
+                    })
+                }
+                
+            }else if(this.count && this.price && this.count>0 && this.remaining>0){
                 this.status = true
                 client.set('user_' + this.type + '_' + this.name, JSON.stringify(this))
                 client.expire('user_' + this.type + '_' + this.name,  60)

@@ -31,12 +31,14 @@ class Logic{
                             lowSalePrice = value.price
                             // console.log('set low', value)
                             client.set('low', JSON.stringify(value))
+                            client.expire('low',  60)
                         }
                     }else if(value.type == 'buy') {
                         if(!hightBuyPrice || hightBuyPrice<value.price){
                             hightBuyPrice = value.price
                             // console.log('set high', value)
                             client.set('high', JSON.stringify(value))
+                            client.expire('high',  60)
                         }
                     }
                 }
@@ -54,14 +56,14 @@ class Logic{
             try{
                 var low = await Logic.getValue(client, 'low')
                 var high = await Logic.getValue(client, 'high')
-                console.log('CHECK')
-                console.log('low', low)
-                console.log('high', high)
+                // console.log('CHECK')
+                // console.log('low', low)
+                // console.log('high', high)
                 if(low && high && low.price<high.price){
                     // console.log('action')
                     Logic.replyTo(bot, low.chatId, '1', low.messageId)
                     Logic.replyTo(bot, high.chatId, '1', high.messageId)
-                    console.log('deleting ...', 'user_sale_' + low.name, 'user_buy_' + high.name)
+                    // console.log('deleting ...', 'user_sale_' + low.name, 'user_buy_' + high.name)
                     client.del('user_sale_' + low.name)
                     client.del('user_buy_' + high.name)
                     client.del('low')
