@@ -16,7 +16,8 @@ class Logic{
         })
     }
 
-    static async findPrices(client, bot){
+    static async findPrices(client, bot, configs){
+        console.log('Find Prices')
         let lowSalePrice, hightBuyPrice
         return new Promise(function(resolve, reject){
             client.keys(`user_*`, async function(err, keys){
@@ -42,7 +43,7 @@ class Logic{
                         }
                     }
                 }
-                Logic.checkPrices(client, bot).then().catch()
+                Logic.checkPrices(client, bot, configs).then().catch()
                 return resolve({
                     lowSalePrice,
                     hightBuyPrice
@@ -51,29 +52,36 @@ class Logic{
         })
     }
 
-    static async checkPrices(client, bot){
-        return new Promise(async function (resolve ,reject){
-            try{
-                var low = await Logic.getValue(client, 'low')
-                var high = await Logic.getValue(client, 'high')
-                // console.log('CHECK')
-                // console.log('low', low)
-                // console.log('high', high)
-                if(low && high && low.price<high.price){
-                    // console.log('action')
-                    Logic.replyTo(bot, low.chatId, '1', low.messageId)
-                    Logic.replyTo(bot, high.chatId, '1', high.messageId)
-                    // console.log('deleting ...', 'user_sale_' + low.name, 'user_buy_' + high.name)
-                    client.del('user_sale_' + low.name)
-                    client.del('user_buy_' + high.name)
-                    client.del('low')
-                    client.del('high')
+    static async checkPrices(client, bot, configs){
+        console.log('check prices')
+        try{
+            var low = await Logic.getValue(client, 'low')
+            var high = await Logic.getValue(client, 'high')
+            if(low && high && low.price<high.price){
+                console.log('ACTION')
+                let requestGold = Math.min(low.remaining, high.remaining)
+                if(configs && configs.max){
+                    requestGold = Math.min(requestGold, configs.max)
                 }
-            }catch(e){console.log(e)}
-        })
+                if(typeof configs.min != 'undefined' && configs.min>requestGold){
+                    return false
+                }
+                if(typeof configs.min == 'undefined' && typeof configs.max == 'undefined'){
+                    requestGold = 1
+                }
+                console.log('Request', requestGold)
+                Logic.replyTo(bot, low.chatId, String(requestGold), low.messageId)
+                Logic.replyTo(bot, high.chatId, String(requestGold), high.messageId)
+                client.del('user_sale_' + low.name)
+                client.del('user_buy_' + high.name)
+                client.del('low')
+                client.del('high')
+            }
+        }catch(e){console.log(e)}
     }
 
     static async replyTo(bot, chat_id, message, message_id){
+        console.log('Reply', chat_id, message_id)
         bot.telegram.sendMessage(chat_id, message, Extra.inReplyTo(message_id))
     }
 }
