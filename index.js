@@ -57,28 +57,46 @@ bot.on('message',async (ctx) => {
             }
         }else{
             if(ctx.login){
-                if(ctx.message.text.indexOf('/min')==0 && ctx.message.text.split(' ').length==2){
-                    let min = parseInt(ctx.message.text.split(' ')[1], 10)
-                    if(isNaN(min)){
-                        ctx.reply('Wrong number')
-                        return false
-                    }
-                    configs.min = min
-                    fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+                if(ctx.message.text.indexOf('/min')==0){
+                    if(ctx.message.text.split(' ').length==2){
+                        let min = parseInt(ctx.message.text.split(' ')[1], 10)
+                        if(isNaN(min)){
+                            ctx.reply('Wrong number')
+                            return false
+                        }
+                        configs.min = min
+                        fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
 
-                    ctx.reply('Min updated successfully')
-                    return true
-                }else if(ctx.message.text.indexOf('/max')==0 && ctx.message.text.split(' ').length==2){
-                    let max = parseInt(ctx.message.text.split(' ')[1], 10)
-                    if(isNaN(max)){
-                        ctx.reply('Wrong number')
-                        return false
+                        ctx.reply('Min updated successfully')
+                        return true
                     }
-                    configs.max = max
-                    fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
-
-                    ctx.reply('Max updated successfully')
-                    return true
+                    if(configs && configs.min){
+                        ctx.reply('Min is ' + configs.min)
+                        return true
+                    }else{
+                        ctx.reply('Min is not set yet')
+                        return true
+                    }
+                }else if(ctx.message.text.indexOf('/max')==0){
+                    if(ctx.message.text.split(' ').length==2){
+                        let max = parseInt(ctx.message.text.split(' ')[1], 10)
+                        if(isNaN(max)){
+                            ctx.reply('Wrong number')
+                            return false
+                        }
+                        configs.max = max
+                        fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+    
+                        ctx.reply('Max updated successfully')
+                        return true
+                    }
+                    if(configs && configs.max){
+                        ctx.reply('Max is ' + configs.max)
+                        return true
+                    }else{
+                        ctx.reply('Max is not set yet')
+                        return true
+                    }
                 }else if(ctx.message.text.indexOf('/password')==0 && ctx.message.text.split(' ').length==2){
                     let password = ctx.message.text.split(' ')[1]
                     if(password!='' && password.length<6){
