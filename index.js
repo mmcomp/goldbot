@@ -19,10 +19,15 @@ if(fs.existsSync('./config.json')){
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
 bot.use(async (ctx, next) => {
-    let loginState = await Logic.getValue(client, 'login_' + ctx.message.from.id)
-    if(loginState)
-        client.expire('login_' + ctx.message.from.id, 15*60)
-    ctx.login = (loginState)?true:false
+    if(ctx && ctx.message && ctx.message.from){
+        let loginState = await Logic.getValue(client, 'login_' + ctx.message.from.id)
+        if(loginState)
+            client.expire('login_' + ctx.message.from.id, 15*60)
+        ctx.login = (loginState)?true:false
+    }else{
+        ctx.login = false
+    }
+
     next()
 })
 
