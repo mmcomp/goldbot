@@ -1,5 +1,6 @@
 class ParseMessage {
     constructor(client, rawMessage, userId, messageId, chatId){
+        // console.log('Message', rawMessage)
         this.userId = userId
         this.status = false
         this.messageId = messageId
@@ -63,6 +64,7 @@ class ParseMessage {
                 
             }else if(this.count && this.price && this.count>0 && this.remaining>0){
                 this.status = true
+                // console.log('Parsed', this)
                 client.set('user_' + this.type + '_' + this.name, JSON.stringify(this))
                 client.expire('user_' + this.type + '_' + this.name,  60)
             }

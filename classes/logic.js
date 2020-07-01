@@ -19,7 +19,7 @@ class Logic{
     }
 
     static async findPrices(client, bot, configs){
-        console.log('Find Prices')
+        // console.log('Find Prices')
         let lowSalePrice, hightBuyPrice
         return new Promise(function(resolve, reject){
             client.keys(`user_*`, async function(err, keys){
@@ -55,7 +55,7 @@ class Logic{
     }
 
     static async checkPrices(client, bot, configs){
-        console.log('check prices')
+        // console.log('check prices')
         try{
             var low = await Logic.getValue(client, 'low')
             var high = await Logic.getValue(client, 'high')
