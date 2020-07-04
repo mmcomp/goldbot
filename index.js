@@ -36,8 +36,8 @@ bot.on('message',async (ctx) => {
     let chat = await ctx.getChat()
     if(chat.type=='private')
     {
-        console.log('login', ctx.login)
-        console.log('message', ctx.message)
+        // console.log('login', ctx.login)
+        // console.log('message', ctx.message)
         if(ctx.message.text=='/start'){
             ctx.reply('Welcome to MMGold Bot' + "\n" + 'Enter you command with / before it!')
         }else if(ctx.message.text.indexOf('/login')==0 && ctx.message.text.split(' ').length==2){
@@ -128,5 +128,16 @@ bot.on('message',async (ctx) => {
             Logic.findPrices(client, bot, configs).then().catch(err => console.log('PRICES Error:', err))  
     }
 })
+
+// bot.on('message',async (ctx) => { 
+//     console.log('message', ctx.message) 
+//     setTimeout(async function (){
+//         console.log(await checkMessageId(bot, ctx.chat.id, ctx.message))
+//     }, 4000) 
+// })
+bot.on('edited_message', (ctx) => { console.log('edited_message') })
+bot.on('inline_query', (ctx) => { console.log('inline_query') })
+bot.on('text', (ctx) => { console.log('text') })
+bot.on('venue', (ctx) => { console.log('venue') })
 
 bot.launch()
