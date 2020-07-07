@@ -1,10 +1,21 @@
 class ParseMessage {
     constructor(client, rawMessage, userId, messageId, chatId){
         // console.log('Message', rawMessage)
+        this.upperMessage = null
+        this.isSale = false
+        if(rawMessage.split("\n").length>1){
+            this.upperMessage = rawMessage.split("\n")[0]
+            if(this.upperMessage.indexOf('خودکار')>=0){
+                this.isSale = true
+            }
+            rawMessage = rawMessage.split("\n")[1]
+        }
+        // console.log('Message', rawMessage)
         this.userId = userId
         this.status = false
         this.messageId = messageId
         this.chatId = chatId
+        
         if(rawMessage.charCodeAt(0)==55357 && rawMessage.charCodeAt(1)==56628){
             this.color = 'red'
         }else if(rawMessage.charCodeAt(0)==55357 && rawMessage.charCodeAt(1)==56629){

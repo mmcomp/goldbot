@@ -65,18 +65,22 @@ class Logic {
         try {
             var low = await Logic.getValue(client, 'low')
             var high = await Logic.getValue(client, 'high')
-            if (low && high && (low.price < high.price || force===true)) {
+            console.log('low', low)
+            console.log('high', high)
+            var priceOk = (low && high && (high.price - low.price >= configs.min_price_diff) && (high.price - low.price <= configs.max_price_diff))
+            if(low && high && (low.isSale || high.isSale)){
+                priceOk = ((high.price - low.price >= configs.min_sale_price_diff) && (high.price - low.price <= configs.max_sale_price_diff))
+            }
+            if (low && high && (priceOk || force===true)) {
                 console.log('ACTION')
                 let requestGold = Math.min(low.remaining, high.remaining)
-                if (configs && configs.max) {
-                    requestGold = Math.min(requestGold, configs.max)
+                if (configs && configs.max_deal) {
+                    requestGold = Math.min(requestGold, configs.max_deal)
                 }
-                if (typeof configs.min != 'undefined' && configs.min > requestGold) {
+                if (configs.min_deal > requestGold) {
                     return false
                 }
-                if (typeof configs.min == 'undefined' && typeof configs.max == 'undefined') {
-                    requestGold = 1
-                }
+                // requestGold = 1
                 console.log('Request', requestGold)
                 if(await Logic.checkMessageId(bot, low.chatId, low.messageId)){
                     Logic.replyTo(bot, low.chatId, String(requestGold), low.messageId)
@@ -84,8 +88,20 @@ class Logic {
                     console.log('Low reply Failed!')
                     return false
                 }
-                setTimeout(async function(){
-
+                if(configs.is_test){
+                    setTimeout(async function(){
+                        if(await Logic.checkMessageId(bot, high.chatId, high.messageId)){
+                            Logic.replyTo(bot, high.chatId, String(requestGold), high.messageId)
+                        }else{
+                            console.log('High reply Failed!', 'low_hazard-' + low.name, JSON.stringify(low))
+                            client.set('low_hazard-' + low.name, JSON.stringify(low))
+                        }
+                        client.del('user_sale_' + low.name)
+                        client.del('user_buy_' + high.name)
+                        client.del('low')
+                        client.del('high')
+                    }, 5000)
+                }else{
                     if(await Logic.checkMessageId(bot, high.chatId, high.messageId)){
                         Logic.replyTo(bot, high.chatId, String(requestGold), high.messageId)
                     }else{
@@ -96,9 +112,8 @@ class Logic {
                     client.del('user_buy_' + high.name)
                     client.del('low')
                     client.del('high')
+                }
 
-
-                }, 5000)
 
 
             }

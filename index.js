@@ -8,7 +8,18 @@ const client = redis.createClient();
 client.on('error', function (error) {
     console.log('redis error : ', error)
 })
-let configs = {}
+let configs = {
+    min_deal: 1,
+    max_deal: 3,
+    min_price_diff: 1,
+    max_price_diff: 3,
+    min_sale_price_diff: 1,
+    max_sale_price_diff: 10,
+    enable_main_bot: true,
+    enable_sale_bot: true,
+    is_test: false,
+    password: "123456"
+}
 if(fs.existsSync('./config.json')){
     let tmp = fs.readFileSync('./config.json')
     try{
@@ -31,6 +42,10 @@ bot.use(async (ctx, next) => {
     next()
 })
 
+// bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))
+bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))
+bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))
+
 bot.on('message',async (ctx) => {
     // console.log(ctx)
     let chat = await ctx.getChat()
@@ -40,6 +55,19 @@ bot.on('message',async (ctx) => {
         // console.log('message', ctx.message)
         if(ctx.message.text=='/start'){
             ctx.reply('Welcome to MMGold Bot' + "\n" + 'Enter you command with / before it!')
+            // const testMenu = Telegraf.Extra
+            // .markdown()
+            // .markup((m) => m.inlineKeyboard([
+            //     m.callbackButton('Test button', 'test')
+            // ]))
+
+            // const aboutMenu = Telegraf.Extra
+            // .markdown()
+            // .markup((m) => m.keyboard([
+            //     m.callbackButton('⬅️ Back')
+            // ]).resize())
+            // ctx.reply('test message', testMenu)
+            // ctx.reply('about', aboutMenu)
         }else if(ctx.message.text.indexOf('/login')==0 && ctx.message.text.split(' ').length==2){
             if(ctx.login){
                 ctx.reply('You are logged in!')
@@ -54,7 +82,26 @@ bot.on('message',async (ctx) => {
             if(password == mainPassword){
                 client.set('login_' + ctx.message.from.id, 'loggedin')
                 client.expire('login_' + ctx.message.from.id, 15*60)
-                ctx.reply('Loggedin successfully')
+                
+                const adminMenus = Telegraf.Extra
+                .markdown()
+                .markup((m) => 
+                {
+                    let buttons = []
+                    if(configs.enable_main_bot)
+                        buttons.push(m.callbackButton('غیرفعال کردن ربات', 'disable_main_bot'))
+                    else
+                        buttons.push(m.callbackButton('فعال کردن ربات', 'enable_main_bot'))
+                    if(configs.enable_sale_bot)
+                        buttons.push(m.callbackButton('غیرفعال کردن ربات', 'disable_sale_bot'))
+                    else
+                        buttons.push(m.callbackButton('فعال کردن ربات', 'enable_sale_bot'))
+                    m.inlineKeyboard(buttons)
+                })
+                ctx.reply('Loggedin successfully').then(()=>{
+                    ctx.reply('منو', adminMenus)
+                })
+
                 return true
             }else{
                 ctx.reply('Wrong password')
@@ -121,8 +168,8 @@ bot.on('message',async (ctx) => {
                 }
             }
         }
-    }else if(ctx.update.message.text){
-        console.log(ctx.update.message.text)
+    }else if(ctx.update.message.text && configs.enable_main_bot){
+        // console.log(ctx.update.message.text)
         let parseMessage = new ParseMessage(client, ctx.update.message.text, ctx.update.message.from.id, ctx.update.message.message_id, ctx.chat.id)
         if(parseMessage.status)
             Logic.findPrices(client, bot, configs).then().catch(err => console.log('PRICES Error:', err))  
