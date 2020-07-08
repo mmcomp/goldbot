@@ -17,6 +17,7 @@ let configs = {
     max_sale_price_diff: 10,
     enable_main_bot: true,
     enable_sale_bot: true,
+    enable_sale_bot_continue: true,
     is_test: false,
     password: "123456"
 }
@@ -42,9 +43,64 @@ bot.use(async (ctx, next) => {
     next()
 })
 
-// bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))
-bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))
-bot.action('test', (ctx) => ctx.answerCbQuery('Yay!'))
+async function sendMenu(ctx, configs){
+    const adminMenus = Telegraf.Extra
+        .markdown()
+        .markup((m) => m.inlineKeyboard([
+            m.callbackButton((configs.enable_main_bot)?'غیرفعال کردن ربات':'فعال کردن ربات', 'disable_bot'),
+            m.callbackButton((configs.enable_sale_bot)?'غیرفعال کردن حراج':'فعال کردن حراج', 'disable_sale'),
+            m.callbackButton((configs.enable_sale_bot_continue)?'غیرفعال کردن ح پیوسته':'فعال کردن ح پیوسته', 'disable_sale_continue')
+        ]))
+    
+    await ctx.reply(`
+    راهنمای ربات
+- جهت مشاهده مقدار هر یک از پارامترهای ذیل دستور مقابل آن را ارسال کنید
+- جهت بروز کردن پارامترهای ذیل دستور مقابل آن را به همراه مقدار که با یک فاصله از آن تایپ شده ارسال کنید
+    \`
+    /min_deal                حداقل برکت
+    /max_deal                حداکثر برکت
+    /min_price_diff          حداقل تفاوت خط
+    /max_price_diff          حداکثر تفاوت خط
+    /min_sale_price_diff     حداقل تفاوت خط حراج
+    /max_sale_price_diff     حداکثر تفاوت خط حراج
+    \`
+    \`\`جهت مشاهده مجدد این منو می توانید فرمان /help  را ارسال  کنید\`\`
+    `, adminMenus)
+    fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+}
+
+bot.action('disable_bot', (ctx) => {
+    if(configs.enable_main_bot){
+        configs.enable_main_bot = false
+        ctx.answerCbQuery('ربات غیرفعال شد')
+    }else{
+        configs.enable_main_bot = true
+        ctx.answerCbQuery('ربات فعال شد')
+    }
+    sendMenu(ctx, configs)
+})
+
+bot.action('disable_sale', (ctx) => {
+    if(configs.enable_sale_bot){
+        configs.enable_sale_bot = false
+        ctx.answerCbQuery('حراج غیرفعال شد')
+    }else{
+        configs.enable_sale_bot = true
+        ctx.answerCbQuery('حراج فعال شد')
+    }
+    sendMenu(ctx, configs)
+})
+
+bot.action('disable_sale_continue', (ctx) => {
+    if(configs.enable_sale_bot_continue){
+        configs.enable_sale_bot_continue = false
+        ctx.answerCbQuery('حراج پیوسته غیرفعال شد')
+    }else{
+        configs.enable_sale_bot_continue = true
+        ctx.answerCbQuery('حراج  پیوسته فعال شد')
+    }
+    sendMenu(ctx, configs)
+})
 
 bot.on('message',async (ctx) => {
     // console.log(ctx)
@@ -82,24 +138,9 @@ bot.on('message',async (ctx) => {
             if(password == mainPassword){
                 client.set('login_' + ctx.message.from.id, 'loggedin')
                 client.expire('login_' + ctx.message.from.id, 15*60)
-                
-                const adminMenus = Telegraf.Extra
-                .markdown()
-                .markup((m) => 
-                {
-                    let buttons = []
-                    if(configs.enable_main_bot)
-                        buttons.push(m.callbackButton('غیرفعال کردن ربات', 'disable_main_bot'))
-                    else
-                        buttons.push(m.callbackButton('فعال کردن ربات', 'enable_main_bot'))
-                    if(configs.enable_sale_bot)
-                        buttons.push(m.callbackButton('غیرفعال کردن ربات', 'disable_sale_bot'))
-                    else
-                        buttons.push(m.callbackButton('فعال کردن ربات', 'enable_sale_bot'))
-                    m.inlineKeyboard(buttons)
-                })
+
                 ctx.reply('Loggedin successfully').then(()=>{
-                    ctx.reply('منو', adminMenus)
+                    sendMenu(ctx, configs)
                 })
 
                 return true
@@ -109,44 +150,126 @@ bot.on('message',async (ctx) => {
             }
         }else{
             if(ctx.login){
-                if(ctx.message.text.indexOf('/min')==0){
+                if(ctx.message.text.indexOf('/min_deal')==0){
                     if(ctx.message.text.split(' ').length==2){
                         let min = parseInt(ctx.message.text.split(' ')[1], 10)
                         if(isNaN(min)){
                             ctx.reply('Wrong number')
                             return false
                         }
-                        configs.min = min
+                        configs.min_deal = min
                         fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
 
-                        ctx.reply('Min updated successfully')
+                        ctx.reply('Min Deal updated successfully')
                         return true
                     }
-                    if(configs && configs.min){
-                        ctx.reply('Min is ' + configs.min)
+                    if(configs && configs.min_deal){
+                        ctx.reply('Min Deal is ' + configs.min_deal)
                         return true
                     }else{
-                        ctx.reply('Min is not set yet')
+                        ctx.reply('Min Deal is not set yet')
                         return true
                     }
-                }else if(ctx.message.text.indexOf('/max')==0){
+                }else if(ctx.message.text.indexOf('/min_price_diff')==0){
+                    if(ctx.message.text.split(' ').length==2){
+                        let min = parseInt(ctx.message.text.split(' ')[1], 10)
+                        if(isNaN(min)){
+                            ctx.reply('Wrong number')
+                            return false
+                        }
+                        configs.min_price_diff = min
+                        fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+
+                        ctx.reply('Min Price updated successfully')
+                        return true
+                    }
+                    if(configs && configs.min_price_diff){
+                        ctx.reply('Min Price is ' + configs.min_price_diff)
+                        return true
+                    }else{
+                        ctx.reply('Min Price is not set yet')
+                        return true
+                    }
+                }else if(ctx.message.text.indexOf('/help')==0){
+                    sendMenu(ctx, configs)
+                }else if(ctx.message.text.indexOf('/min_sale_price_diff')==0){
+                    if(ctx.message.text.split(' ').length==2){
+                        let min = parseInt(ctx.message.text.split(' ')[1], 10)
+                        if(isNaN(min)){
+                            ctx.reply('Wrong number')
+                            return false
+                        }
+                        configs.min_sale_price_diff = min
+                        fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+
+                        ctx.reply('Min Sale Price updated successfully')
+                        return true
+                    }
+                    if(configs && configs.min_sale_price_diff){
+                        ctx.reply('Min Sale Price is ' + configs.min_sale_price_diff)
+                        return true
+                    }else{
+                        ctx.reply('Min Sale Price is not set yet')
+                        return true
+                    }
+                }else if(ctx.message.text.indexOf('/max_deal')==0){
                     if(ctx.message.text.split(' ').length==2){
                         let max = parseInt(ctx.message.text.split(' ')[1], 10)
                         if(isNaN(max)){
                             ctx.reply('Wrong number')
                             return false
                         }
-                        configs.max = max
+                        configs.max_deal = max
                         fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
     
-                        ctx.reply('Max updated successfully')
+                        ctx.reply('Max Deal updated successfully')
                         return true
                     }
-                    if(configs && configs.max){
-                        ctx.reply('Max is ' + configs.max)
+                    if(configs && configs.max_deal){
+                        ctx.reply('Max Deal is ' + configs.max_deal)
                         return true
                     }else{
-                        ctx.reply('Max is not set yet')
+                        ctx.reply('Max Deal is not set yet')
+                        return true
+                    }
+                }else if(ctx.message.text.indexOf('/max_price_diff')==0){
+                    if(ctx.message.text.split(' ').length==2){
+                        let max = parseInt(ctx.message.text.split(' ')[1], 10)
+                        if(isNaN(max)){
+                            ctx.reply('Wrong number')
+                            return false
+                        }
+                        configs.max_price_diff = max
+                        fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+    
+                        ctx.reply('Max Price updated successfully')
+                        return true
+                    }
+                    if(configs && configs.max_price_diff){
+                        ctx.reply('Max Price is ' + configs.max_price_diff)
+                        return true
+                    }else{
+                        ctx.reply('Max Price is not set yet')
+                        return true
+                    }
+                }else if(ctx.message.text.indexOf('/max_sale_price_diff')==0){
+                    if(ctx.message.text.split(' ').length==2){
+                        let max = parseInt(ctx.message.text.split(' ')[1], 10)
+                        if(isNaN(max)){
+                            ctx.reply('Wrong number')
+                            return false
+                        }
+                        configs.max_sale_price_diff = max
+                        fs.writeFile('./config.json', JSON.stringify(configs), () =>{})
+    
+                        ctx.reply('Max Sale Price updated successfully')
+                        return true
+                    }
+                    if(configs && configs.max_sale_price_diff){
+                        ctx.reply('Max Sale Price is ' + configs.max_sale_price_diff)
+                        return true
+                    }else{
+                        ctx.reply('Max Sale Price is not set yet')
                         return true
                     }
                 }else if(ctx.message.text.indexOf('/password')==0 && ctx.message.text.split(' ').length==2){
@@ -170,7 +293,7 @@ bot.on('message',async (ctx) => {
         }
     }else if(ctx.update.message.text && configs.enable_main_bot){
         // console.log(ctx.update.message.text)
-        let parseMessage = new ParseMessage(client, ctx.update.message.text, ctx.update.message.from.id, ctx.update.message.message_id, ctx.chat.id)
+        let parseMessage = new ParseMessage(client, ctx.update.message.text, ctx.update.message.from.id, ctx.update.message.message_id, ctx.chat.id, configs)
         if(parseMessage.status)
             Logic.findPrices(client, bot, configs).then().catch(err => console.log('PRICES Error:', err))  
     }

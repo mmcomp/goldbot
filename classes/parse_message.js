@@ -1,5 +1,5 @@
 class ParseMessage {
-    constructor(client, rawMessage, userId, messageId, chatId){
+    constructor(client, rawMessage, userId, messageId, chatId, configs){
         // console.log('Message', rawMessage)
         this.upperMessage = null
         this.isSale = false
@@ -7,6 +7,9 @@ class ParseMessage {
             this.upperMessage = rawMessage.split("\n")[0]
             if(this.upperMessage.indexOf('خودکار')>=0){
                 this.isSale = true
+                if(!configs.enable_sale_bot){
+                    return false
+                }
             }
             rawMessage = rawMessage.split("\n")[1]
         }

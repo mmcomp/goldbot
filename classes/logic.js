@@ -73,15 +73,18 @@ class Logic {
             }
             if (low && high && (priceOk || force===true)) {
                 console.log('ACTION')
-                let requestGold = Math.min(low.remaining, high.remaining)
-                if (configs && configs.max_deal) {
-                    requestGold = Math.min(requestGold, configs.max_deal)
+                let requestGold = 1
+                if(!low.isSale && !high.isSale){
+                    requestGold = Math.min(low.remaining, high.remaining)
+                    if (configs && configs.max_deal) {
+                        requestGold = Math.min(requestGold, configs.max_deal)
+                    }
+                    if (configs.min_deal > requestGold) {
+                        return false
+                    }
                 }
-                if (configs.min_deal > requestGold) {
-                    return false
-                }
-                // requestGold = 1
                 console.log('Request', requestGold)
+
                 if(await Logic.checkMessageId(bot, low.chatId, low.messageId)){
                     Logic.replyTo(bot, low.chatId, String(requestGold), low.messageId)
                 }else{
@@ -96,10 +99,14 @@ class Logic {
                             console.log('High reply Failed!', 'low_hazard-' + low.name, JSON.stringify(low))
                             client.set('low_hazard-' + low.name, JSON.stringify(low))
                         }
-                        client.del('user_sale_' + low.name)
-                        client.del('user_buy_' + high.name)
-                        client.del('low')
-                        client.del('high')
+                        if(!low.isSale || !configs.enable_sale_bot_continue || low.remaining==0) {
+                            client.del('user_sale_' + low.name)
+                            client.del('low')
+                        }
+                        if(!high.isSale || !configs.enable_sale_bot_continue || high.remaining==0){
+                            client.del('user_buy_' + high.name)
+                            client.del('high')
+                        }
                     }, 5000)
                 }else{
                     if(await Logic.checkMessageId(bot, high.chatId, high.messageId)){
@@ -108,10 +115,14 @@ class Logic {
                         console.log('High reply Failed!', 'low_hazard-' + low.name, JSON.stringify(low))
                         client.set('low_hazard-' + low.name, JSON.stringify(low))
                     }
-                    client.del('user_sale_' + low.name)
-                    client.del('user_buy_' + high.name)
-                    client.del('low')
-                    client.del('high')
+                    if(!low.isSale || !configs.enable_sale_bot_continue || low.remaining==0) {
+                        client.del('user_sale_' + low.name)
+                        client.del('low')
+                    }
+                    if(!high.isSale || !configs.enable_sale_bot_continue || high.remaining==0){
+                        client.del('user_buy_' + high.name)
+                        client.del('high')
+                    }
                 }
 
 

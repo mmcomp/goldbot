@@ -1,12 +1,1 @@
-{
-    "min_deal": 1,
-    "max_deal": 3,
-    "min_price_diff": 1,
-    "max_price_diff": 3,
-    "min_sale_price_diff": 1,
-    "max_sale_price_diff": 10,
-    "enable_main_bot": true,
-    "enable_sale_bot": true,
-    "is_test": true,
-    "password": "123456"
-}
+{"min_deal":1,"max_deal":3,"min_price_diff":1,"max_price_diff":3,"min_sale_price_diff":1,"max_sale_price_diff":10,"enable_main_bot":true,"enable_sale_bot":true,"enable_sale_bot_continue":true,"is_test":false,"password":"123456"}
